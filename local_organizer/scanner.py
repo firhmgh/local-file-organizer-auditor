@@ -6,7 +6,7 @@ File and directory scanner:
 """
 import os
 from pathlib import Path
-from typing import Dict, List, Optional, Set
+from typing import Callable, Dict, List, Optional, Set
 from dataclasses import dataclass, field
 from local_organizer.config import PROTECTED_DIR_PATTERNS
 
@@ -84,9 +84,11 @@ def scan_directory(
     excluded_extensions: Optional[Set[str]] = None,
     whitelist_dirs: Optional[Set[str]] = None,
     min_size_bytes: int = 0,
+    progress_callback: Optional[Callable[[int, Path], None]] = None,
 ) -> ScanResult:
     """
     Perform a safe, non-modifying scan of the specified root_dir.
+    Optional progress_callback(current_count, current_path) is called periodically.
     """
     root_path = Path(root_dir).resolve()
     if not root_path.exists():
@@ -168,8 +170,14 @@ def scan_directory(
                 files_by_size.setdefault(file_size, []).append(file_path)
                 total_size += file_size
 
+                if progress_callback and len(files) % 50 == 0:
+                    progress_callback(len(files), file_path)
+
             except (PermissionError, FileNotFoundError, OSError) as e:
                 errors.append(f"Gagal membaca metadata {file_path}: {e}")
+
+    if progress_callback:
+        progress_callback(len(files), root_path)
 
     return ScanResult(
         root_path=root_path,

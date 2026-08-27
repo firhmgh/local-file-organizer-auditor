@@ -52,11 +52,12 @@ local-file-organizer-auditor/
 │
 ├── local_organizer/
 │   ├── __init__.py
+│   ├── gui.py                  # Tkinter Desktop GUI Layer
 │   ├── cli.py                  # Antarmuka CLI & argumen interaktif
 │   ├── config.py               # Rule immunity, pola ekstensi & kategori
 │   ├── scanner.py              # File traversal & pengumpul metadata
 │   ├── hasher.py               # Multi-tier duplicate detector (Size -> Partial -> Full SHA-256)
-│   ├── classifier.py           # Klasifikasi 7 status & deteksi file nyasar
+│   ├── classifier.py           # Klasifikasi status & deteksi file nyasar
 │   ├── keeper_selector.py      # Algoritma penentuan file master vs duplikat redundan
 │   ├── reporter.py             # Generator LOCAL_FILE_AUDIT.md & .json
 │   ├── cleanup.py              # Eksekutor aman Windows Recycle Bin (send2trash)
@@ -64,12 +65,15 @@ local-file-organizer-auditor/
 │
 ├── tests/
 │   ├── __init__.py
+│   ├── test_gui.py             # Unit & integration test desktop GUI
+│   ├── test_gis_bundle.py      # Unit test proteksi dataset GIS & web export
 │   ├── test_hasher.py          # Unit test algoritma hashing & duplicate
 │   ├── test_classifier.py      # Unit test proteksi & klasifikasi
 │   └── test_end_to_end.py      # Unit test audit end-to-end & mock recycle bin
 │
 ├── create_dummy_data.py        # Generator dataset dummy untuk simulasi
-├── run_audit.py                # Runner script utama
+├── gui.py                      # Launcher utama GUI Desktop
+├── run_audit.py                # Runner script utama CLI
 ├── requirements.txt            # Dependensi (send2trash, rich, pytest)
 ├── pyproject.toml
 └── README.md
@@ -90,9 +94,29 @@ pip install -r requirements.txt
 
 ---
 
-## 💻 Panduan Penggunaan
+## 🖥️ Panduan Penggunaan Desktop GUI (Tkinter)
 
-### 1. Menjalankan Audit (Default: Mode Dry-Run / Non-Destructive)
+Untuk pengalaman interaktif berbasis tampilan grafis Windows yang responsif dan aman:
+
+```powershell
+python gui.py
+```
+
+### Fitur Tampilan GUI:
+1. **Pemilih Folder Target:** Tombol *Browse* untuk memilih direktori mana pun di komputer Anda.
+2. **Audit Real-Time (Dry-Run):** Pemindaian berjalan di latar belakang (*background thread*) sehingga jendela aplikasi tidak akan *freeze*.
+3. **Kartu Ringkasan:** Menampilkan metrik total file, kapasitas, duplikat aman, duplikat GIS kebal, aset proyek kebal, salah lokasi, kandidat hapus, dan potensi penghematan ruang.
+4. **Tabel Interaktif & Filter Kategori:** Menampilkan daftar temuan lengkap dengan kolom path, ukuran, risiko, alasan, keeper master, dan filter kategori drop-down.
+5. **Tombol Buka Laporan:** Membuka laporan `LOCAL_FILE_AUDIT.md` secara instan pada aplikasi default sistem.
+6. **Pembersihan Konservatif:** Tombol *Eksekusi Cleanup* hanya aktif untuk `DUPLIKAT AMAN` dan `KANDIDAT HAPUS` setelah konfirmasi eksplisit dari pengguna (Hanya ke Windows Recycle Bin).
+
+---
+
+## 💻 Panduan Penggunaan CLI (Command Line Interface)
+
+Selain GUI, seluruh fitur dapat diakses penuh melalui terminal:
+
+### 1. Menjalankan Audit CLI (Default: Mode Dry-Run / Non-Destructive)
 Untuk mengaudit folder target tertentu tanpa mengubah apa pun:
 
 ```powershell
@@ -103,7 +127,7 @@ atau tentukan lokasi penyimpanan laporan:
 python run_audit.py --path "D:\FolderYangInginDiaudit" --output-dir "D:\FolderLaporan"
 ```
 
-### 2. Opsi Filter & Pengecualian
+### 2. Opsi Filter & Pengecualian CLI
 - **Mengecualikan folder tertentu:**
   ```powershell
   python run_audit.py --path "D:\Data" --exclude-dirs build cache logs
@@ -123,9 +147,9 @@ python run_audit.py --path "D:\FolderYangInginDiaudit" --output-dir "D:\FolderLa
 
 ---
 
-## 🧹 Mode Cleanup (Pembersihan Aman)
+## 🧹 Mode Cleanup CLI (Pembersihan Aman)
 
-Setelah Anda meninjau file laporan `LOCAL_FILE_AUDIT.md` dan menyetujui rekomendasinya, Anda dapat menjalankan cleanup.
+Setelah Anda meninjau file laporan `LOCAL_FILE_AUDIT.md` dan menyetujui rekomendasinya, Anda dapat menjalankan cleanup via CLI.
 
 ### Contoh Perintah:
 1. **Membersihkan duplikat redundan & file sampah ke Windows Recycle Bin (dengan prompt konfirmasi):**
@@ -139,7 +163,7 @@ Setelah Anda meninjau file laporan `LOCAL_FILE_AUDIT.md` dan menyetujui rekomend
 
 > **Catatan Keamanan:** 
 > - File yang masuk ke Recycle Bin dapat dibuka kembali melalui Windows Desktop Recycle Bin jika sewaktu-waktu Anda ingin memulihkannya (*Restore*).
-> - File dengan status `FILE SISTEM/KONFIGURASI` dan `PERTAHANKAN` **tidak akan pernah disentuh**.
+> - File dengan status `FILE SISTEM/KONFIGURASI`, `DUPLIKAT KONTEKSTUAL GIS`, `DUPLIKAT KONTEKSTUAL PROJECT`, dan `PERTAHANKAN` **tidak akan pernah disentuh**.
 
 ---
 

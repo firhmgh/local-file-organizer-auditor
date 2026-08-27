@@ -1,5 +1,5 @@
 """
-Local File Organizer & Auditor Package
+Local File Organizer & Auditor Package (V3 - Desktop & CLI)
 """
 
-__version__ = "1.0.0"
+__version__ = "3.0.0"
