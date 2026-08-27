@@ -1,0 +1,4 @@
+# Dependencies
+send2trash>=1.8.2
+rich>=13.0.0
+pytest>=8.0.0
