@@ -14,11 +14,21 @@ build/
 dist/
 *.egg-info/
 
-# Local Audit Reports & Logs
+# Local Audit Reports, Workspaces & Artifacts
 reports/
 dummy_test_workspace/
+scratch/
 *.log
 *.sqlite
+*.tmp
+*.temp
 *.json
 !pyproject.toml
 !package.json
+
+# IDE / OS specific
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
+.DS_Store
